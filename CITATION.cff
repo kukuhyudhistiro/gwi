@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: >-
+  If you use this code, please cite the software below. The GWi stage is the static
+  imaginary-only Gabor wavelet of the A-GWi article listed under references; please cite
+  that article as well.
+title: "GWi: imaginary-only Gabor wavelet with orientation-aware double-peak suppression (ODPS)"
+type: software
+license: MIT
+repository-code: "https://github.com/kukuhyudhistiro/gwi"
+authors:
+  - family-names: Yudhistiro
+    given-names: Kukuh
+    affiliation: "Universitas Merdeka Malang; Universitas Dian Nuswantoro"
+  - family-names: Basuki
+    given-names: Ruri Suko
+    affiliation: "Universitas Dian Nuswantoro"
+  - family-names: Rijati
+    given-names: Nova
+    affiliation: "Universitas Dian Nuswantoro"
+references:
+  - type: article
+    title: "Adaptive Imaginary Gabor Wavelet: Per-Pixel Kernel Modulation via Local Gradient Activity for Edge-Based Boundary Detection"
+    authors:
+      - family-names: Yudhistiro
+        given-names: Kukuh
+      - family-names: Basuki
+        given-names: Ruri S.
+      - family-names: Rijati
+        given-names: Nova
+    journal: "Journal Européen des Systèmes Automatisés"
+    volume: 59
+    issue: 9
+    start: 2495
+    end: 2508
+    year: 2026
+    doi: "10.18280/jesa.590906"

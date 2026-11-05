@@ -1,0 +1,159 @@
+seed: 42
+paths:
+  data_root: /tmp/claude-0/-home-claude/09caa6f0-aba3-5f50-9603-e3c5d49c3af0/scratchpad/synth
+  results: /tmp/claude-0/-home-claude/09caa6f0-aba3-5f50-9603-e3c5d49c3af0/scratchpad/synth/../synth_results
+  legacy_summary: ../eval_results/k5/ods_summary.csv
+  zerodce_weights: ./weights/zerodce_epoch99.npz
+datasets:
+  BSDS500:
+    gt_format: mat
+    splits:
+      train:
+        images: images/train
+        gt: groundTruth/train
+      val:
+        images: images/val
+        gt: groundTruth/val
+      test:
+        images: images/test
+        gt: groundTruth/test
+  BIPED:
+    gt_format: png
+    splits:
+      train:
+        images: edges/imgs/train/rgbr/real
+        gt: edges/edge_maps/train/rgbr/real
+      test:
+        images: edges/imgs/test
+        gt: edges/edge_maps/test
+  UDED:
+    gt_format: png
+    splits:
+      test:
+        images: imgs
+        gt: gt
+eval:
+  n_thresholds: 99
+  max_dist: 0.0075
+  match: greedy
+  n_jobs: 2
+preproc_default: he
+methods_default:
+  gabor:
+    ksize: 5
+    wavelength: 4.0
+    gamma: 0.5
+    n_orientations: 8
+  odps_d: auto
+  canny_sigma: 1.4
+  log_sigma: 1.5
+  pc:
+    nscale: 4
+    min_wavelength: 6
+  ed:
+    gradient_threshold: 20
+    anchor_threshold: 8
+degradation:
+  gaussian_sigmas:
+  - 0
+  - 20
+  - 30
+  lowlight:
+    full_well: 1000
+    read_noise: 3.0
+    gamma: 2.2
+    gains_pilot:
+    - 1.0
+    - 0.1
+    - 0.05
+    gains_full:
+    - 1.0
+    - 0.1
+    - 0.05
+    - 0.02
+    mode_primary: iso
+    mode_secondary: dark
+stats:
+  n_boot: 200
+  ci: 0.95
+  alpha: 0.05
+tuning:
+  gabor_grid:
+    ksize:
+    - 3
+    - 5
+    wavelength:
+    - 4
+    - 5
+  tie_eps: 0.005
+  canny_sigma:
+  - 1.4
+  - 2.0
+  canny_low_ratio: 0.4
+  sobel_sigma:
+  - 0.0
+  - 1.0
+  log_sigma:
+  - 1.4
+  pc:
+    nscale:
+    - 3
+    min_wavelength:
+    - 3
+  ed:
+    gradient_threshold:
+    - 20
+    anchor_threshold:
+    - 8
+gates:
+  b0_pilot:
+    target: GWi_odps
+    comparators:
+      iso:
+      - Canny_clean_selected
+      - Canny_matched
+      - BM3D_Canny
+      dark:
+      - Canny_clean_selected
+      - Canny_matched
+      - ZeroDCE_Canny
+    decide_on: iso
+    gains:
+    - 0.1
+    - 0.05
+    preproc: he
+  b1_gwc_soften_ratio: 0.5
+  b5_offset_max: 0.05
+  b7_noise:
+    target: GWi_odps
+    comparator: Canny_tuned
+    sigmas:
+    - 20
+    - 30
+  b7b_lowlight:
+    target: GWi_odps
+    comparators:
+      iso:
+      - Canny_tuned
+      - Canny_matched
+      - BM3D_Canny
+      dark:
+      - Canny_tuned
+      - Canny_matched
+      - ZeroDCE_Canny
+    gains:
+    - 0.1
+    - 0.05
+    - 0.02
+b4:
+  maps_root: ./results/maps
+  methods: []
+  threads: 1
+  warmup: 3
+  repeats: 3
+b5:
+  references: []
+timing:
+  warmup: 3
+  repeats: 3
+  n_images: 4

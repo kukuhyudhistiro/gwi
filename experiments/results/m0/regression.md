@@ -1,0 +1,26 @@
+| dataset   | method   |    ods |   ods_f |   d_ods |   d_ois |   d_ap | pass   |
+|:----------|:---------|-------:|--------:|--------:|--------:|-------:|:-------|
+| BSDS500   | GWi      | 0.4443 |  0.4443 |       0 |       0 |      0 | True   |
+| BSDS500   | GWi_odps | 0.4696 |  0.4696 |       0 |       0 |      0 | True   |
+| BSDS500   | GWC      | 0.3941 |  0.3941 |       0 |       0 |      0 | True   |
+| BSDS500   | Canny    | 0.5336 |  0.5336 |       0 |       0 |      0 | True   |
+| BSDS500   | Sobel    | 0.4643 |  0.4643 |       0 |       0 |      0 | True   |
+| BSDS500   | LoG      | 0.4706 |  0.4706 |       0 |       0 |      0 | True   |
+| BSDS500   | PC       | 0.5245 |  0.5245 |       0 |       0 |      0 | True   |
+| BSDS500   | ED       | 0.3467 |  0.3467 |       0 |       0 |      0 | True   |
+| BIPED     | GWi      | 0.5602 |  0.5602 |       0 |       0 |      0 | True   |
+| BIPED     | GWi_odps | 0.5744 |  0.5744 |       0 |       0 |      0 | True   |
+| BIPED     | GWC      | 0.4106 |  0.4106 |       0 |       0 |      0 | True   |
+| BIPED     | Canny    | 0.6406 |  0.6406 |       0 |       0 |      0 | True   |
+| BIPED     | Sobel    | 0.5844 |  0.5844 |       0 |       0 |      0 | True   |
+| BIPED     | LoG      | 0.5481 |  0.5481 |       0 |       0 |      0 | True   |
+| BIPED     | PC       | 0.5688 |  0.5688 |       0 |       0 |      0 | True   |
+| BIPED     | ED       | 0.3133 |  0.3133 |       0 |       0 |      0 | True   |
+| UDED      | GWi      | 0.6072 |  0.6072 |       0 |       0 |      0 | True   |
+| UDED      | GWi_odps | 0.6449 |  0.6449 |       0 |       0 |      0 | True   |
+| UDED      | GWC      | 0.4668 |  0.4668 |       0 |       0 |      0 | True   |
+| UDED      | Canny    | 0.6737 |  0.6737 |       0 |       0 |      0 | True   |
+| UDED      | Sobel    | 0.639  |  0.639  |       0 |       0 |      0 | True   |
+| UDED      | LoG      | 0.6364 |  0.6364 |       0 |       0 |      0 | True   |
+| UDED      | PC       | 0.5654 |  0.5654 |       0 |       0 |      0 | True   |
+| UDED      | ED       | 0.5376 |  0.5376 |       0 |       0 |      0 | True   |

@@ -1,0 +1,15 @@
+# Daftar klaim numerik naskah untuk C6 (contoh — ganti dengan klaim di draf IJIES).
+# fungsi: ods(tabel, dataset, metode) ; val(tabel, kolom, **filter)
+# tabel = path CSV relatif terhadap results/ tanpa .csv
+- id: contoh_ods_gwi_odps_bsds
+  text: "0.470"
+  expr: "ods('b3/ods_ci', 'BSDS500', 'GWi_odps')"
+  fmt: "{:.3f}"
+- id: contoh_delta_odps_vs_gwi_bsds
+  text: "+0.025"
+  expr: "val('b3/tests', 'delta', dataset='BSDS500', a='GWi_odps', b='GWi')"
+  fmt: "{:+.3f}"
+- id: contoh_mac_ratio
+  text: "50%"
+  expr: "100*val('b6/ops_per_pixel', 'mac_vs_GWC', method='GWi')"
+  fmt: "{:.0f}%"

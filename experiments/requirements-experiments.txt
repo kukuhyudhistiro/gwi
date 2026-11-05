@@ -1,0 +1,11 @@
+# Dependensi tambahan untuk folder experiments/ (di atas ../requirements.txt).
+# Versi di bawah = versi yang dipakai saat paket ini diuji (Python 3.13).
+# Setelah instalasi di mesin eksperimen, jalankan scripts/m0_env.py untuk membekukan versi aktual.
+PyYAML>=6.0          # diuji: 6.0.3
+bm3d>=4.0            # diuji: 4.0.3   (pembanding BM3D_Canny, mode iso)
+tabulate>=0.9        # diuji: 0.10.0  (tabel Markdown)
+python-docx>=1.1     # diuji: 1.2.0   (C6 audit naskah .docx)
+pytest>=8            # diuji: 9.1.1
+# Opsional:
+# torch              # hanya untuk B4 --profile (model DL) dan verifikasi Zero-DCE vs model resmi
+# line_profiler      # B8 profil per baris

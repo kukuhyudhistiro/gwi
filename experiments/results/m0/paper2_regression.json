@@ -1,0 +1,6 @@
+{
+  "pass": true,
+  "tol": 0.002,
+  "limit": null,
+  "max_abs_delta_gated": 1.5670902767661588e-06
+}

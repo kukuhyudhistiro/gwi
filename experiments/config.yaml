@@ -1,0 +1,161 @@
+# =============================================================================
+# config.yaml — satu sumber parameter untuk seluruh eksperimen GWi+ODPS (IJIES)
+# Semua modul (M0, B0–B8, M9) membaca file ini. Jangan ubah nilai setelah
+# modul yang bergantung padanya dijalankan; kalau terpaksa, catat di CHANGELOG
+# dan hapus cache yang terdampak (results/counts/...).
+# =============================================================================
+
+seed: 42
+
+paths:
+  data_root: ../data                  # relatif terhadap folder experiments/
+  results: ./results
+  legacy_summary: ../eval_results/k5/ods_summary.csv   # acuan uji regresi M0
+  zerodce_weights: ./weights/zerodce_epoch99.npz       # hasil tools/convert_zerodce.py
+
+# -----------------------------------------------------------------------------
+# Dataset & split. Glob relatif terhadap data_root/<name>/.
+# BSDS500: train(200) + val(100) untuk tuning, test(200) hanya untuk laporan.
+# BIPED train hanya untuk cek stabilitas B1. UDED tidak pernah untuk tuning.
+# -----------------------------------------------------------------------------
+datasets:
+  BSDS500:
+    gt_format: mat
+    splits:
+      train: {images: images/train, gt: groundTruth/train}
+      val:   {images: images/val,   gt: groundTruth/val}
+      test:  {images: images/test,  gt: groundTruth/test}
+  BIPED:
+    gt_format: png
+    splits:
+      train: {images: edges/imgs/train/rgbr/real, gt: edges/edge_maps/train/rgbr/real}
+      test:  {images: edges/imgs/test,           gt: edge_maps/test}         # layout aktual project_GWi_ODPS_v2/data/BIPED
+  UDED:
+    gt_format: png
+    splits:
+      test:  {images: imgs, gt: gt}
+
+# -----------------------------------------------------------------------------
+# Evaluator (sama dengan 04c_evaluate_bsds_v2.py)
+# -----------------------------------------------------------------------------
+eval:
+  n_thresholds: 99
+  max_dist: 0.0075          # fraksi diagonal
+  match: greedy             # greedy (= 04c, protokol naskah) | maxcard (B5)
+  engine: fast              # fast = count identik dengan 04c, median 6.4× lebih cepat | legacy = panggil 04c
+                            # (kesetaraan diverifikasi: scripts/m0_verify_fast_eval.py)
+  n_jobs: 8                 # proses paralel untuk evaluasi (tidak dipakai saat timing)
+
+preproc_default: he_cv2     # he_cv2 = BT.601 + cv2.equalizeHist, sama dengan Paper 2 (JESA 59(9), Eq. 1–2)
+                            # he = HE versi PIL (naskah DSP, hanya untuk M0) | none
+
+# -----------------------------------------------------------------------------
+# Parameter default metode. Sejak 0.3.0 tahap GWi diambil persis dari Paper 2
+# (Yudhistiro et al., JESA 59(9):2495–2508, doi:10.18280/jesa.590906, Tabel 3):
+# k = 7, λ = 4, σ = 0.56·λ, γ = 0.5, N = 8, reflection padding, tanpa normalisasi
+# kernel, min-max per citra. ODPS ditambahkan di atasnya. GWC memakai kernel,
+# window, dan border yang sama. B2 menimpa baseline lewat results/selected_config.json.
+# -----------------------------------------------------------------------------
+methods_legacy:             # konfigurasi naskah DSP (Tabel 5–7), HANYA untuk regresi M0
+  gabor: {ksize: 5, wavelength: 4.0, gamma: 0.5, n_orientations: 8}
+methods_default:
+  gabor: {ksize: 7, wavelength: 4.0, gamma: 0.5, n_orientations: 8, border: reflect}
+  odps_d: auto              # auto = floor(lambda/2 + 0.5) → λ=4 → d=2
+  canny_sigma: 1.4
+  log_sigma: 1.5
+  pc: {nscale: 4, min_wavelength: 6}
+  ed: {gradient_threshold: 20, anchor_threshold: 8}
+
+# -----------------------------------------------------------------------------
+# Model degradasi
+# -----------------------------------------------------------------------------
+degradation:
+  gaussian_sigmas: [0, 5, 10, 20, 30]      # B7, skala 8-bit, per kanal RGB
+  lowlight:
+    # Model Poisson–Gaussian pada domain linear (inverse gamma 2.2):
+    #   e = Poisson(g · FW · x_lin) + N(0, σ_r²)
+    #   mode iso : y_lin = e / (g · FW)  (digital gain ala auto-exposure kamera)
+    #   mode dark: y_lin = e / FW        (tanpa kompensasi gain)
+    #   y = clip(y_lin)^(1/2.2), dikuantisasi ke 8-bit
+    full_well: 1000          # elektron pada putih saat g = 1
+    read_noise: 3.0          # elektron (rms)
+    gamma: 2.2
+    gains_pilot: [1.0, 0.1, 0.05]
+    gains_full:  [1.0, 0.3, 0.1, 0.05, 0.02]
+    mode_primary: iso
+    mode_secondary: dark
+
+# -----------------------------------------------------------------------------
+# Statistik (B3)
+# -----------------------------------------------------------------------------
+stats:
+  n_boot: 1000
+  ci: 0.95
+  alpha: 0.05
+
+# -----------------------------------------------------------------------------
+# Grid tuning (B1, B2)
+# -----------------------------------------------------------------------------
+tuning:
+  gabor_select: false       # false = GWi tetap konfigurasi Paper 2; B1 hanya sensitivitas (lihat CHANGELOG 0.3.0)
+  gabor_grid: {ksize: [3, 5, 7, 9], wavelength: [3, 4, 5, 6]}
+  tie_eps: 0.005            # selisih ODS < tie_eps → pilih k terkecil, lalu λ terkecil
+  canny_sigma: [1.0, 1.4, 2.0, 2.8]
+  canny_low_ratio: 0.4
+  sobel_sigma: [0.0, 1.0, 1.4, 2.0]
+  log_sigma: [1.0, 1.4, 2.0, 2.8]
+  pc: {nscale: [3, 4, 5], min_wavelength: [3, 6]}
+  ed: {gradient_threshold: [16, 20, 24], anchor_threshold: [6, 8, 10]}
+
+# -----------------------------------------------------------------------------
+# Aturan keputusan — DITETAPKAN SEBELUM DATA DILIHAT. Jangan diubah sesudahnya.
+# -----------------------------------------------------------------------------
+gates:
+  b0_pilot:
+    # GO kalau GWi_odps mengungguli SEMUA pembanding mode primer (iso) pada SEMUA gain
+    # di bawah, dengan ΔODS (estimasi titik) > 0. CI dilaporkan, tidak dipakai di pilot
+    # (n=100). Mode dark dilaporkan sebagai sekunder: kalau dark gagal, klaim dibatasi
+    # ke "low-light dengan kompensasi gain (auto-exposure)".
+    # Pembanding pipeline per mode: iso → denoise dulu (BM3D), dark → enhancement dulu
+    # (Zero-DCE). Zero-DCE pada citra iso (sudah terang) bukan pembanding yang wajar.
+    # Revisi 2026-11-04, sebelum B0 dijalankan pada data asli (lihat CHANGELOG).
+    target: GWi_odps
+    comparators:
+      iso:  [Canny_clean_selected, Canny_matched, BM3D_Canny]
+      dark: [Canny_clean_selected, Canny_matched, ZeroDCE_Canny]
+    decide_on: iso
+    gains: [0.1, 0.05]
+    preproc: he_cv2           # 0.3.0: ikut preproc_default (HE OpenCV, Paper 2); aturan gate tidak berubah
+  b1_gwc_soften_ratio: 0.5   # B2: GWC(tuned) menutup > 50% gap → lunakkan klaim
+  b5_offset_max: 0.05
+  b7_noise:
+    target: GWi_odps
+    comparator: Canny_tuned
+    sigmas: [20, 30]          # ΔODS > 0 dan CI 95% tidak mencakup 0 di semua σ ini
+  b7b_lowlight:
+    # PASS per mode kalau ΔODS > 0 dan CI_lo > 0 terhadap semua pembanding mode itu,
+    # di semua gain berikut. Framing low-light hanya boleh dipakai kalau iso = PASS.
+    target: GWi_odps
+    comparators:
+      iso:  [Canny_tuned, Canny_matched, BM3D_Canny]
+      dark: [Canny_tuned, Canny_matched, ZeroDCE_Canny]
+    gains: [0.1, 0.05, 0.02]
+
+# -----------------------------------------------------------------------------
+# B4 / B5 — diisi manual dari sumber resmi (JANGAN mengisi dari ingatan)
+# -----------------------------------------------------------------------------
+b4:
+  maps_root: ./results/maps          # results/maps/<method>/<dataset>/<id>.png
+  methods: []                        # contoh: [TEED, PiDiNet_tiny, LDC]
+  threads: 1
+  warmup: 3
+  repeats: 3
+b5:
+  references: []
+  # contoh entri:
+  # - {method: PiDiNet, dataset: BSDS500, reported_ods: null, source: "isi DOI/URL"}
+
+timing:
+  warmup: 3
+  repeats: 3
+  n_images: 50               # subset deterministik per dataset untuk runtime

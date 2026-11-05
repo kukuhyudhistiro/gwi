@@ -1,0 +1,32 @@
+# Dataset (own licenses; see data/README.md)
+data/*
+!data/README.md
+
+# Experiment outputs: count caches and DL maps are not committed; summary CSVs are committed explicitly
+experiments/results/counts/
+experiments/results/maps/
+experiments/results/**/*.npz
+
+# Local working folders that are not part of the repository
+output/
+preprocessed/
+figures/
+manuscript/
+density_profiling/
+revisi_runtime_tabel8/
+runtime_logs/
+pipeline/
+third_party/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.egg-info/
+
+# OS / sync
+desktop.ini
+.tmp.driveupload/
+Thumbs.db
+.DS_Store
